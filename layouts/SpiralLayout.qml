@@ -1,5 +1,6 @@
 pragma Singleton
 import Quickshell
+import Quickshell.Hyprland
 
 Singleton {
     id: root
@@ -7,6 +8,11 @@ Singleton {
     function doLayout(windowList, outerWidth, outerHeight, gap) {
         var N = windowList.length
         if (N === 0) return []
+
+        var activeIdx = windowList.findIndex(it => it.lastIpcObject.address ===Hyprland.activeToplevel.lastIpcObject.address)
+        if (activeIdx !== -1) {
+          windowList = [windowList[activeIdx], ...windowList.filter(it => it !== windowList[activeIdx])]
+        }
 
         var result = []
 

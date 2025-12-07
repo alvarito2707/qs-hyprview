@@ -322,13 +322,6 @@ PanelWindow {
                                     return 0
                                 })
 
-                                if (["hero", "spiral"].includes(root.layoutAlgorithm)) {
-                                    var activeIdx = windowList.findIndex(it => it.lastIpcObject.address ===Hyprland.activeToplevel.lastIpcObject.address)
-                                    if (activeIdx !== -1) {
-                                      windowList = [windowList[activeIdx], ...windowList.filter(it => it !== windowList[activeIdx])]
-                                    }
-                                }
-
                                 var maxThumbHeight = exposeArea.height * 0.3
                                 return LayoutsManager.doLayout(
                                     root.layoutAlgorithm,

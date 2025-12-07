@@ -164,6 +164,7 @@ Feeling adventurous? This mode selects one of the above algorithms at random eve
 | **Arrows (↑ ↓ ← →)** | Spatial navigation between thumbnails |
 | **Tab / Shift+Tab** | Sequential navigation |
 | **Enter** | Activate selected window |
+| **Middle Click** | Close hovered window |
 | **Esc / Click BG** | Close dashboard |
 
 ## 🤝 Contributing

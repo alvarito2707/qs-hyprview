@@ -8,7 +8,7 @@ import Quickshell.Hyprland
 import Qt5Compat.GraphicalEffects
 
 Item {
-    id: delegateItem
+    id: thumbContainer
 
     property var hWin: null
     property var wHandle:null
@@ -36,14 +36,14 @@ Item {
 
     NumberAnimation {
         id: animX
-        target: delegateItem
+        target: thumbContainer
         property: "x"
         duration: root.animateWindows ? 100 : 0
         easing.type: Easing.OutQuad
     }
     NumberAnimation {
         id: animY
-        target: delegateItem
+        target: thumbContainer
         property: "y"
         duration: root.animateWindows ? 100 : 0
         easing.type: Easing.OutQuad
@@ -131,7 +131,7 @@ Item {
         root.toggleExpose()
         Hyprland.dispatch("focuswindow address:0x" + hWin.address)
         Hyprland.dispatch("alterzorder top")
-        if (delegateItem.moveCursorToActiveWindow) {
+        if (thumbContainer.moveCursorToActiveWindow) {
           var cx = clientInfo.at[0] + (clientInfo.size[0]/2)
           var cy = clientInfo.at[1] + (clientInfo.size[1]/2)
         Hyprland.dispatch("movecursor " + cx + " " + cy)
@@ -154,7 +154,7 @@ Item {
         id: card
         anchors.fill: parent
 
-        scale: delegateItem.hovered ? 1.05 : 0.95
+        scale: thumbContainer.hovered ? 1.05 : 0.95
         transformOrigin: Item.Center
 
         Behavior on scale {
@@ -174,10 +174,10 @@ Item {
                 exposeArea.currentIndex = index
 
                 if (event.button === Qt.LeftButton) {
-                    delegateItem.activateWindow()
+                    thumbContainer.activateWindow()
                 }
                 if (event.button === Qt.MiddleButton) {
-                    delegateItem.closeWindow()
+                    thumbContainer.closeWindow()
                 }
             }
         }
@@ -194,14 +194,14 @@ Item {
         Loader {
             id: thumbLoader
             anchors.fill: parent
-            active: root.isActive && !!delegateItem.wHandle
+            active: root.isActive && !!thumbContainer.wHandle
             sourceComponent: ScreencopyView {
                 id: thumb
                 anchors.fill: parent
-                captureSource: delegateItem.wHandle
+                captureSource: thumbContainer.wHandle
                 live: root.liveCapture && root.isActive
                 paintCursor: false
-                visible: root.isActive && delegateItem.wHandle && hasContent
+                visible: root.isActive && thumbContainer.wHandle && hasContent
 
                 layer.enabled: true
                 layer.effect: OpacityMask {
@@ -214,9 +214,9 @@ Item {
 
                 Rectangle {
                     anchors.fill: parent
-                    color: delegateItem.hovered ? "transparent": "#33000000"
-                    border.width : delegateItem.hovered ? 3 : 1
-                    border.color : delegateItem.hovered ? "#ff0088cc" : "#cc444444"
+                    color: thumbContainer.hovered ? "transparent": "#33000000"
+                    border.width : thumbContainer.hovered ? 3 : 1
+                    border.color : thumbContainer.hovered ? "#ff0088cc" : "#cc444444"
                     radius: 16
                 }
             }
@@ -225,14 +225,14 @@ Item {
         Rectangle {
             id: badge
             z: 100
-            width: Math.min(titleText.implicitWidth + 24, delegateItem.thumbW * 0.75)
+            width: Math.min(titleText.implicitWidth + 24, thumbContainer.thumbW * 0.75)
             height: titleText.implicitHeight + 12
 
             x: (card.width - width) / 2
             y: card.height - height - (card.height * 0.08)
 
             radius: 12
-            color: delegateItem.hovered ? "#FF000000" : "#CC000000"
+            color: thumbContainer.hovered ? "#FF000000" : "#CC000000"
             border.width : 1
             border.color : "#ff464646"
 
@@ -242,7 +242,7 @@ Item {
                 width: parent.width - 16
                 text: hWin.title
                 color: "white"
-                font.pixelSize: delegateItem.hovered ? 13 : 12
+                font.pixelSize: thumbContainer.hovered ? 13 : 12
                 elide: Text.ElideRight
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter

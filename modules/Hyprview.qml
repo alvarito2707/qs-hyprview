@@ -12,19 +12,18 @@ import '.'
 PanelWindow {
     id: root
 
-    // --- CONFIGURAZIONE ---
+    // --- SETTINGS ---
     property string layoutAlgorithm: ""
     property string lastLayoutAlgorithm: ""
     property bool liveCapture: false
     property bool moveCursorToActiveWindow: false
 
-    // --- STATO INTERNO ---
+    // --- INTERNAL STATE ---
     property bool isActive: false
     property bool specialActive: false
     property bool animateWindows: false
     property var lastPositions: {}
 
-    // Configurazione Finestra
     anchors { top: true; bottom: true; left: true; right: true }
     color: "transparent"
     visible: isActive
@@ -35,7 +34,7 @@ PanelWindow {
     WlrLayershell.keyboardFocus: isActive ? 1 : 0
     WlrLayershell.namespace: "quickshell:expose"
 
-    // --- IPC & EVENTI ---
+    // --- IPC & EVENTS ---
 
     IpcHandler {
         target: "expose"
@@ -48,7 +47,6 @@ PanelWindow {
     Connections {
         target: Hyprland
         function onRawEvent(ev) {
-            // Ascoltiamo eventi solo se attivi o per monitorare lo special workspace
             if (!root.isActive && ev.name !== "activespecial") return
 
             switch (ev.name) {
@@ -72,7 +70,7 @@ PanelWindow {
         }
     }
 
-    // Timer per aggiornare le miniature (se liveCapture è false)
+    // Update thumbs every 125ms if liveCapture = false
     Timer {
         id: screencopyTimer
         interval: 125
@@ -81,20 +79,18 @@ PanelWindow {
         onTriggered: root.refreshThumbs()
     }
 
-    // --- LOGICA FUNZIONALE ---
 
     function toggleExpose() {
         root.isActive = !root.isActive
         if (root.isActive) {
             if (root.layoutAlgorithm === 'random') {
-                var layouts = ['justified', 'bands', 'masonry', 'spiral', 'hero', 'smartgrid'].filter((l) => l !== root.lastLayoutAlgorithm)
+              var layouts = ['justified', 'bands', 'masonry', 'spiral', 'hero', 'smartgrid']
+                  .filter((l) => l !== root.lastLayoutAlgorithm)
                 var randomLayout = layouts[Math.floor(Math.random() * layouts.length)]
                 root.lastLayoutAlgorithm = randomLayout
             } else {
                 root.lastLayoutAlgorithm = root.layoutAlgorithm
             }
-
-            console.log(root.layoutAlgorithm, root.lastLayoutAlgorithm)
 
             exposeArea.currentIndex = 0
             exposeArea.searchText = ""
@@ -117,18 +113,17 @@ PanelWindow {
         }
     }
 
-    // --- INTERFACCIA UTENTE ---
+    // --- USER INTERFACE ---
 
     FocusScope {
         id: mainScope
         anchors.fill: parent
         focus: true
 
-        // Gestione Tastiera (Navigazione)
+        // Keyboard navigation
         Keys.onPressed: (event) => {
             if (!root.isActive) return
 
-            // ESC: Chiudi
             if (event.key === Qt.Key_Escape) {
                 root.toggleExpose()
                 event.accepted = true
@@ -138,7 +133,7 @@ PanelWindow {
             const total = winRepeater.count
             if (total <= 0) return
 
-            // Funzione helper navigazione orizzontale
+            // Helper for horizontal navigation
             function moveSelectionHorizontal(delta) {
                 var start = exposeArea.currentIndex
                 for (var step = 1; step <= total; ++step) {
@@ -151,7 +146,7 @@ PanelWindow {
                 }
             }
 
-            // Funzione helper navigazione spaziale (Su/Giù)
+            // Helper for vertical navigation
             function moveSelectionVertical(dir) {
                 var startIndex = exposeArea.currentIndex
                 var currentItem = winRepeater.itemAt(startIndex)
@@ -176,14 +171,14 @@ PanelWindow {
                     var cy = it.y + it.height / 2
                     var dy = cy - curCy
 
-                    // Filtra direzione
-                    if (dir > 0 && dy <= 0) continue // Cercavamo giù, ma è sopra
-                    if (dir < 0 && dy >= 0) continue // Cercavamo su, ma è sotto
+                    // Direction filtering
+                    if (dir > 0 && dy <= 0) continue
+                    if (dir < 0 && dy >= 0) continue
 
                     var absDy = Math.abs(dy)
                     var absDx = Math.abs(cx - curCx)
 
-                    // Cerca il più vicino (privilegiando vicinanza verticale, poi orizzontale)
+                    // Search for nearest thumb (first in vertical, then horizontal distance)
                     if (absDy < bestDy || (absDy === bestDy && absDx < bestDx)) {
                         bestDy = absDy
                         bestDx = absDx
@@ -196,7 +191,6 @@ PanelWindow {
                 }
             }
 
-            // Mapping Tasti
             if (event.key === Qt.Key_Right || event.key === Qt.Key_Tab) {
                 moveSelectionHorizontal(1)
                 event.accepted = true
@@ -218,7 +212,6 @@ PanelWindow {
             }
         }
 
-        // Click sullo sfondo chiude
         MouseArea {
             anchors.fill: parent
             hoverEnabled: false
@@ -237,7 +230,7 @@ PanelWindow {
                 anchors.margins: 48
                 spacing: 20
 
-                // AREA DELLE MINIATURE
+                // thumbs area
                 Item {
                     id: exposeArea
                     width: layoutRoot.width
@@ -246,18 +239,14 @@ PanelWindow {
                     property int currentIndex: 0
                     property string searchText: ""
 
-                    // Quando cambia la ricerca, resetta la selezione
+                    // Reset active thumb on searchText change
                     onSearchTextChanged: {
                         currentIndex = (windowLayoutModel.count > 0) ? 0 : -1
                     }
 
-                    // --- FIX BINDING LOOP ---
-                    // ScriptModel separato dal Repeater con proprietà "gate"
                     ScriptModel {
                         id: windowLayoutModel
 
-                        // Proprietà Gate: isolano il binding loop
-                        // Il modello si aggiorna SOLO se queste cambiano valore
                         property int areaW: exposeArea.width
                         property int areaH: exposeArea.height
                         property string query: exposeArea.searchText
@@ -265,7 +254,7 @@ PanelWindow {
                         property var rawToplevels: Hyprland.toplevels.values
 
                         values: {
-                            // Validazione dimensioni
+                            // Bailout on wrong screen size
                             if (areaW <= 0 || areaH <= 0) return []
 
                             var q = (query || "").toLowerCase()
@@ -280,13 +269,13 @@ PanelWindow {
                                 var workspace = clientInfo && clientInfo.workspace ? clientInfo.workspace : null
                                 var workspaceId = workspace && workspace.id !== undefined ? workspace.id : undefined
 
-                                // Filtra workspace non validi o finestre off-screen
+                                // Filter invalid workspace or offscreen windows
                                 if (workspaceId === undefined || workspaceId === null) continue
                                 var size = clientInfo && clientInfo.size ? clientInfo.size : [0, 0]
                                 var at = clientInfo && clientInfo.at ? clientInfo.at : [-1000, -1000]
                                 if (at[1] + size[1] <= 0) continue
 
-                                // Filtra Testo
+                                // Text filtering
                                 var title = (w.title || clientInfo.title || "").toLowerCase()
                                 var clazz = (clientInfo["class"] || "").toLowerCase()
                                 var ic = (clientInfo.initialClass || "").toLowerCase()
@@ -309,7 +298,7 @@ PanelWindow {
                                 })
                             }
 
-                            // Ordinamento
+                            // Sort by workspaceId, then originalIndex
                             windowList.sort(function(a, b) {
                                 if (a.workspaceId < b.workspaceId) return -1
                                 if (a.workspaceId > b.workspaceId) return 1
@@ -318,8 +307,6 @@ PanelWindow {
                                 return 0
                             })
 
-                            // Layout
-                            // Nota: LayoutsManager deve essere un Singleton importato o un file js
                             return LayoutsManager.doLayout(algo, windowList, areaW, areaH)
                         }
                     }
@@ -328,8 +315,8 @@ PanelWindow {
                         id: winRepeater
                         model: windowLayoutModel
 
-                        delegate: WindowMiniature {
-                            // Dati dal modello
+                        delegate: WindowThumbnail {
+                            // Model data
                             hWin: modelData.win
                             wHandle: hWin.wayland
                             winKey: String(hWin.address)
@@ -337,18 +324,17 @@ PanelWindow {
                             thumbH: modelData.height
                             clientInfo: hWin.lastIpcObject
 
-                            // Coordinate calcolate
+                            // Layout-generated coordinates
                             targetX: modelData.x
                             targetY: modelData.y
 
-                            // Stato Interattivo
                             hovered: visible && (exposeArea.currentIndex === index)
                             moveCursorToActiveWindow: root.moveCursorToActiveWindow
                         }
                     }
                 }
 
-                // BARRA DI RICERCA
+                // Search bar
                 Rectangle {
                     id: searchBox
                     width: Math.min(layoutRoot.width * 0.6, 480)
@@ -371,22 +357,9 @@ PanelWindow {
                         activeFocusOnTab: false
                         selectByMouse: true
 
-                        // Aggiorna la proprietà di exposeArea
                         onTextChanged: {
                             exposeArea.searchText = text
                             root.animateWindows = true
-                        }
-
-                        // Previene che i tasti di navigazione muovano il cursore testo
-                        Keys.onPressed: (event) => {
-                            if (event.key === Qt.Key_Left   || event.key === Qt.Key_Right  ||
-                                event.key === Qt.Key_Up     || event.key === Qt.Key_Down   ||
-                                event.key === Qt.Key_Return || event.key === Qt.Key_Enter  ||
-                                event.key === Qt.Key_Tab    || event.key === Qt.Key_Backtab) {
-                                event.accepted = false // Lascia gestire al FocusScope padre
-                            } else {
-                                root.animateWindows = true
-                            }
                         }
 
                         Text {

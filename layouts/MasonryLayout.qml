@@ -4,9 +4,13 @@ import Quickshell
 Singleton {
     id: root
 
-    function doLayout(windowList, outerWidth, outerHeight, gap) {
+    function doLayout(windowList, outerWidth, outerHeight) {
         var N = windowList.length
         if (N === 0) return []
+
+        // Gap: 0.8% of screen, clamped between 12px and 32px
+        var rawGap = Math.min(outerWidth * 0.08, outerHeight * 0.08)
+        var gap = Math.max(12, Math.min(32, rawGap))
 
         // Safe Area (90%)
         // Define the bounding box for the content.

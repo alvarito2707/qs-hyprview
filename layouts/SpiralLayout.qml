@@ -5,9 +5,13 @@ import Quickshell.Hyprland
 Singleton {
     id: root
 
-    function doLayout(windowList, outerWidth, outerHeight, gap) {
+    function doLayout(windowList, outerWidth, outerHeight) {
         var N = windowList.length
         if (N === 0) return []
+
+        // Gap: 0.4% of screen, clamped between 12px and 24px
+        var rawGap = Math.min(outerWidth * 0.04, outerHeight * 0.04)
+        var gap = Math.max(12, Math.min(24, rawGap))
 
         var activeIdx = windowList.findIndex(it => it.lastIpcObject.address ===Hyprland.activeToplevel.lastIpcObject.address)
         if (activeIdx !== -1) {

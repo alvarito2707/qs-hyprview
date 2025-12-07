@@ -4,8 +4,8 @@ import './modules'
 
 ShellRoot {
   Hyprview {
-    // scegli il layout: 'bands', 'smartgrid', 'spiral', 'hero', 'masonry', 'justified',
-    layoutAlgorithm: "smartgrid"
+    // scegli il layout: 'smartgrid', 'justified', 'bands', 'masonry', 'spiral', 'hero'
+    layoutAlgorithm: "hero"
     liveCapture: false
     moveCursorToActiveWindow: false
   }

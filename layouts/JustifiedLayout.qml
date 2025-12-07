@@ -4,13 +4,19 @@ import Quickshell
 Singleton {
     id: root
 
-    function doLayout(windowList, outerWidth, outerHeight, hGap, vGap, maxThumbH) {
+    function doLayout(windowList, outerWidth, outerHeight) {
         var N = windowList.length
         if (N === 0)
             return []
 
         var containerWidth  = outerWidth  * 0.9
         var containerHeight = outerHeight * 0.9
+
+        // Gap: 0.8% of screen, clamped between 12px and 32px
+        var rawGap = Math.min(outerWidth * 0.08, outerHeight * 0.08)
+        var gap = Math.max(12, Math.min(32, rawGap))
+
+        var maxThumbHeight = outerHeight * 0.3
 
         if (containerWidth <= 0 || containerHeight <= 0) {
             return windowList.map(function(item) {
@@ -24,7 +30,7 @@ Singleton {
             })
         }
 
-        var targetRowH = maxThumbH
+        var targetRowH = maxThumbHeight
         var rows = []
         var currentRow = []
         var sumAspect = 0
@@ -34,16 +40,16 @@ Singleton {
                 return
 
             var n = currentRow.length
-            var rowHeight = maxThumbH
+            var rowHeight = maxThumbHeight
             if (sumAspect > 0) {
-                var totalGapWidth = hGap * (n - 1)
+                var totalGapWidth = gap * (n - 1)
                 var hFit = (containerWidth - totalGapWidth) / sumAspect
                 if (hFit < rowHeight)
                     rowHeight = hFit
             }
 
-            if (rowHeight > maxThumbH)
-                rowHeight = maxThumbH
+            if (rowHeight > maxThumbHeight)
+                rowHeight = maxThumbHeight
             if (rowHeight <= 0)
                 rowHeight = 1
 
@@ -65,7 +71,7 @@ Singleton {
             item.aspect = a
 
             if (currentRow.length > 0 &&
-                ((sumAspect + a) * targetRowH + hGap * currentRow.length) > containerWidth) {
+                ((sumAspect + a) * targetRowH + gap * currentRow.length) > containerWidth) {
                 flushRow()
             }
 
@@ -82,7 +88,7 @@ Singleton {
             totalRawHeight += rows[r].height
         }
         if (rows.length > 1) {
-            totalRawHeight += vGap * (rows.length - 1)
+            totalRawHeight += gap * (rows.length - 1)
         }
 
         var sV = 1.0
@@ -110,7 +116,7 @@ Singleton {
             for (var j = 0; j < row.items.length; ++j) {
                 rowWidthNoGapsScaled += row.items[j].aspect * rowHeightScaled
             }
-            var totalRowWidthScaled = rowWidthNoGapsScaled + hGap * (row.items.length - 1)
+            var totalRowWidthScaled = rowWidthNoGapsScaled + gap * (row.items.length - 1)
 
             var xAcc = (outerWidth - totalRowWidthScaled) / 2
             if (!isFinite(xAcc))
@@ -129,12 +135,12 @@ Singleton {
                     height: hScaled
                 })
 
-                xAcc += wScaled + hGap
+                xAcc += wScaled + gap
             }
 
             yAcc += rowHeightScaled
             if (r2 < rows.length - 1) {
-                yAcc += vGap * sV
+                yAcc += gap * sV
             }
         }
 

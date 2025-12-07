@@ -5,8 +5,12 @@ import Quickshell.Hyprland
 Singleton {
     id: root
 
-    function doLayout(windowList, outerWidth, outerHeight, gap) {
+    function doLayout(windowList, outerWidth, outerHeight) {
         if (windowList.length === 0) return []
+
+        // Gap: 0.8% of screen, clamped between 12px and 32px
+        var rawGap = Math.min(outerWidth * 0.08, outerHeight * 0.08)
+        var gap = Math.max(12, Math.min(32, rawGap))
 
         // Move active window to the head of windowList
         var activeAddr = Hyprland.activeToplevel?.lastIpcObject?.address

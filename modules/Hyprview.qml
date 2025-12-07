@@ -18,7 +18,6 @@ PanelWindow {
     property bool isActive: false
     property bool specialActive: false
     property bool animateWindows: false
-    // mappa address -> { x, y } per l'animazione
     property var lastPositions: {}
 
     anchors { top: true; bottom: true; left: true; right: true }
@@ -258,9 +257,6 @@ PanelWindow {
                     property int currentIndex: 0
                     property string searchText: ""
 
-                    property real hGap: 64
-                    property real vGap: 64
-
                     onSearchTextChanged: {
                         currentIndex = (winRepeater.count > 0) ? 0 : -1
                     }
@@ -322,16 +318,7 @@ PanelWindow {
                                     return 0
                                 })
 
-                                var maxThumbHeight = exposeArea.height * 0.3
-                                return LayoutsManager.doLayout(
-                                    root.layoutAlgorithm,
-                                    windowList,
-                                    exposeArea.width,
-                                    exposeArea.height,
-                                    exposeArea.hGap,
-                                    exposeArea.vGap,
-                                    maxThumbHeight
-                                )
+                                return LayoutsManager.doLayout( root.layoutAlgorithm, windowList, exposeArea.width, exposeArea.height)
                             }
                         }
 

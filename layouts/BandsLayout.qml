@@ -4,174 +4,169 @@ import Quickshell
 Singleton {
     id: root
 
-    function doLayout(windowList, outerWidth, outerHeight, hGap, vGap, maxThumbH) {
+    function doLayout(windowList, outerWidth, outerHeight) {
         var N = windowList.length
-        if (N === 0)
-            return []
+        if (N === 0) return []
 
-        var workspaceOrder = []
-        var lastWs = null
-        for (var i = 0; i < N; ++i) {
-            var wsId = windowList[i].workspaceId
-            if (workspaceOrder.length === 0 || wsId !== lastWs) {
-                workspaceOrder.push(wsId)
-                lastWs = wsId
+        // Gap: 0.8% of screen, clamped between 12px and 24px
+        var rawGap = Math.min(outerWidth * 0.08, outerHeight * 0.08)
+        var gap = Math.max(12, Math.min(24, rawGap))
+
+        // Safe Area: 90% of the screen
+        var contentScale = 0.90
+        var useW = outerWidth * contentScale
+        var useH = outerHeight * contentScale
+
+        // Global offsets to center everything
+        var offX = (outerWidth - useW) / 2
+        var offY = (outerHeight - useH) / 2
+
+        // Group by workspace
+        var groups = {}
+        var wsOrder = []
+
+        for (var i = 0; i < N; i++) {
+            var w = windowList[i]
+            var wsId = w.workspaceId
+
+            if (!groups[wsId]) {
+                groups[wsId] = []
+                wsOrder.push(wsId)
             }
+            groups[wsId].push(w)
         }
-        var bandCount = workspaceOrder.length
-        if (bandCount === 0)
-            return []
 
-        var totalBandGap = vGap * (bandCount - 1)
-        var bandHeight = (outerHeight - totalBandGap) / bandCount
-        if (bandHeight <= 0)
-            bandHeight = outerHeight / bandCount
+        var bandCount = wsOrder.length
+        if (bandCount === 0) return []
+
+        // Band height & max thumb height
+
+        // Calculate the height allocated for each workspace band
+        var totalGapH = gap * (bandCount - 1)
+        var bandHeight = (useH - totalGapH) / bandCount
+
+        // Aesthetic Cap: Even if we have only 1 workspace,
+        // windows shouldn't exceed 45% of screen height.
+        var absoluteMaxH = useH * 0.45
+
+        // The effective max height is the smaller of the two.
+        // If we have 10 bands, bandHeight will be small (e.g. 100px), so that rules.
+        // If we have 1 band, bandHeight is huge (1000px), so absoluteMaxH (450px) rules.
+        var localMaxH = Math.min(bandHeight, absoluteMaxH)
+
+        // Minimum safety height to avoid division by zero errors
+        if (localMaxH < 10) localMaxH = 10
 
         var result = []
+        var currentY = offY
 
-        var containerWidth = outerWidth * 0.9
+        // Process each band
+        for (var b = 0; b < bandCount; b++) {
+            var wsId = wsOrder[b]
+            var items = groups[wsId]
+            var itemCount = items.length
 
-        function layoutBand(bandWindows, bandTopY, bandIndex) {
-            var count = bandWindows.length
-            if (count === 0)
-                return
-
-            var innerHeight = bandHeight * 0.8
-            var localMaxThumbH = maxThumbH
-            if (innerHeight > 0 && innerHeight < localMaxThumbH)
-                localMaxThumbH = innerHeight
-            if (localMaxThumbH <= 0)
-                localMaxThumbH = maxThumbH
-
+            // ROW LAYOUT CALCULATION (Justified)
             var rows = []
             var currentRow = []
-            var sumAspect = 0
-            var targetRowH = localMaxThumbH
+            var currentAspectSum = 0
 
-            function flushRow() {
-                if (currentRow.length === 0)
-                    return
+            for (var k = 0; k < itemCount; k++) {
+                var item = items[k]
+                var w0 = (item.width > 0) ? item.width : 100
+                var h0 = (item.height > 0) ? item.height : 100
+                var aspect = w0 / h0
 
-                var n = currentRow.length
-                var rowHeight = localMaxThumbH
-                if (sumAspect > 0) {
-                    var totalGapWidth = hGap * (n - 1)
-                    var hFit = (containerWidth - totalGapWidth) / sumAspect
-                    if (hFit < rowHeight)
-                        rowHeight = hFit
+                var wrapper = { win: item.win, aspect: aspect }
+
+                // Check overflow: (SumAspects * MaxH) + Gaps > Width
+                var hypotheticalWidth = (currentAspectSum + aspect) * localMaxH + (currentRow.length * gap)
+
+                if (currentRow.length > 0 && hypotheticalWidth > useW) {
+                    rows.push({ items: currentRow, aspectSum: currentAspectSum })
+                    currentRow = []
+                    currentAspectSum = 0
                 }
 
-                if (rowHeight > localMaxThumbH)
-                    rowHeight = localMaxThumbH
-                if (rowHeight <= 0)
-                    rowHeight = 1
-
-                rows.push({
-                    items: currentRow.slice(),
-                    height: rowHeight,
-                    sumAspect: sumAspect
-                })
-
-                currentRow = []
-                sumAspect = 0
+                currentRow.push(wrapper)
+                currentAspectSum += aspect
             }
-
-            for (var i = 0; i < count; ++i) {
-                var item = bandWindows[i]
-                var w0 = item.width > 0 ? item.width : 1
-                var h0 = item.height > 0 ? item.height : 1
-                var a = w0 / h0
-                item.aspect = a
-
-                if (currentRow.length > 0 &&
-                    ((sumAspect + a) * targetRowH + hGap * currentRow.length) > containerWidth) {
-                    flushRow()
-                }
-
-                currentRow.push(item)
-                sumAspect += a
-            }
-
             if (currentRow.length > 0) {
-                flushRow()
+                rows.push({ items: currentRow, aspectSum: currentAspectSum })
             }
 
-            var totalRawHeight = 0
-            var rowGap = vGap * 0.4
-            for (var r = 0; r < rows.length; ++r) {
-                totalRawHeight += rows[r].height
+            // SCALE & FIT ROWS
+            // Calculate how tall the content actually is
+            var totalContentH = 0
+            var finalRows = []
+
+            for (var r = 0; r < rows.length; r++) {
+                var rowObj = rows[r]
+                var rItems = rowObj.items
+
+                // Optimal Height = (Available Width / Sum Aspects)
+                var availRowW = useW - (gap * (rItems.length - 1))
+                var optimalH = availRowW / rowObj.aspectSum
+
+                // Clamp to limits
+                if (optimalH > localMaxH) optimalH = localMaxH
+
+                finalRows.push({ items: rItems, h: optimalH })
+                totalContentH += optimalH
             }
-            if (rows.length > 1) {
-                totalRawHeight += rowGap * (rows.length - 1)
+
+            // Add vertical gaps between rows inside the band
+            if (finalRows.length > 1) {
+                totalContentH += gap * (finalRows.length - 1)
             }
 
-            var sB = 1.0
-            var innerHeightAvail = bandHeight * 0.8
-            if (innerHeightAvail > 0 && totalRawHeight > innerHeightAvail) {
-                sB = innerHeightAvail / totalRawHeight
+            // If rows overflow the band height (rare, but possible with many windows), scale down
+            var scaleFactor = 1.0
+            if (totalContentH > bandHeight) {
+                scaleFactor = bandHeight / totalContentH
+                totalContentH = bandHeight // Cap for centering math
             }
-            if (sB <= 0)
-                sB = 0.1
-            if (sB > 1.0)
-                sB = 1.0
 
-            var usedHeightScaled = totalRawHeight * sB
-            var bandYStart = bandTopY + (bandHeight - usedHeightScaled) / 2
-            if (!isFinite(bandYStart))
-                bandYStart = bandTopY
+            // GENERATE COORDINATES
+            // Center the content vertically within the band slot
+            // Note: If bandCount=1, bandHeight is huge (90% screen), but totalContentH is constrained by absoluteMaxH.
+            // This ensures the single row floats nicely in the middle.
+            var rowY = currentY + (bandHeight - totalContentH) / 2
 
-            for (var r2 = 0; r2 < rows.length; ++r2) {
-                var row = rows[r2]
-                var rowHeightScaled = row.height * sB
+            for (var r2 = 0; r2 < finalRows.length; r2++) {
+                var fRow = finalRows[r2]
+                var rHeight = fRow.h * scaleFactor
+                var rItems2 = fRow.items
 
-                var rowWidthNoGapsScaled = 0
-                for (var j = 0; j < row.items.length; ++j) {
-                    rowWidthNoGapsScaled += row.items[j].aspect * rowHeightScaled
+                // Calculate row width for horizontal centering
+                var actualRowW = 0
+                for (var j = 0; j < rItems2.length; j++) {
+                    actualRowW += (rItems2[j].aspect * rHeight)
                 }
-                var totalRowWidthScaled = rowWidthNoGapsScaled + hGap * (row.items.length - 1)
+                actualRowW += gap * (rItems2.length - 1)
 
-                var xAcc = (outerWidth - totalRowWidthScaled) / 2
-                if (!isFinite(xAcc))
-                    xAcc = 0
+                var rowX = offX + (useW - actualRowW) / 2
 
-                var rowY = bandYStart
-
-                for (var j2 = 0; j2 < row.items.length; ++j2) {
-                    var it2 = row.items[j2]
-                    var wScaled = it2.aspect * rowHeightScaled
-                    var hScaled = rowHeightScaled
+                for (var j2 = 0; j2 < rItems2.length; j2++) {
+                    var it = rItems2[j2]
+                    var finalW = it.aspect * rHeight
 
                     result.push({
-                        win: it2.win,
-                        x: xAcc,
+                        win: it.win,
+                        x: rowX,
                         y: rowY,
-                        width: wScaled,
-                        height: hScaled
+                        width: finalW,
+                        height: rHeight
                     })
 
-                    xAcc += wScaled + hGap
+                    rowX += finalW + gap
                 }
 
-                bandYStart += rowHeightScaled
-                if (r2 < rows.length - 1) {
-                    bandYStart += rowGap * sB
-                }
-            }
-        }
-
-        var bandTop = 0
-        for (var b = 0; b < bandCount; ++b) {
-            var wsId = workspaceOrder[b]
-            var bandWindows = []
-            for (var i2 = 0; i2 < N; ++i2) {
-                if (windowList[i2].workspaceId === wsId)
-                    bandWindows.push(windowList[i2])
+                rowY += rHeight + (gap * scaleFactor)
             }
 
-            layoutBand(bandWindows, bandTop, b)
-            bandTop += bandHeight
-            if (b < bandCount - 1)
-                bandTop += vGap
+            // Advance Y to the next band slot
+            currentY += bandHeight + gap
         }
 
         return result

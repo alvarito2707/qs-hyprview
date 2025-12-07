@@ -39,7 +39,8 @@ PanelWindow {
 
     IpcHandler {
         target: "expose"
-        function toggle() {
+        function toggle(layout: string) {
+            root.layoutAlgorithm = layout
             root.toggleExpose()
         }
     }

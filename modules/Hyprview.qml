@@ -14,6 +14,7 @@ PanelWindow {
 
     // --- CONFIGURAZIONE ---
     property string layoutAlgorithm: ""
+    property string lastLayoutAlgorithm: ""
     property bool liveCapture: false
     property bool moveCursorToActiveWindow: false
 
@@ -84,6 +85,16 @@ PanelWindow {
     function toggleExpose() {
         root.isActive = !root.isActive
         if (root.isActive) {
+            if (root.layoutAlgorithm === 'random') {
+                var layouts = ['justified', 'bands', 'masonry', 'spiral', 'hero', 'smartgrid'].filter((l) => l !== root.lastLayoutAlgorithm)
+                var randomLayout = layouts[Math.floor(Math.random() * layouts.length)]
+                root.lastLayoutAlgorithm = randomLayout
+            } else {
+                root.lastLayoutAlgorithm = root.layoutAlgorithm
+            }
+
+            console.log(root.layoutAlgorithm, root.lastLayoutAlgorithm)
+
             exposeArea.currentIndex = 0
             exposeArea.searchText = ""
             Hyprland.refreshToplevels()
@@ -249,7 +260,7 @@ PanelWindow {
                         property int areaW: exposeArea.width
                         property int areaH: exposeArea.height
                         property string query: exposeArea.searchText
-                        property string algo: root.layoutAlgorithm
+                        property string algo: root.lastLayoutAlgorithm
                         property var rawToplevels: Hyprland.toplevels.values
 
                         values: {
@@ -324,7 +335,7 @@ PanelWindow {
                             thumbW: modelData.width
                             thumbH: modelData.height
                             clientInfo: hWin.lastIpcObject
-                            
+
                             // Coordinate calcolate
                             targetX: modelData.x
                             targetY: modelData.y

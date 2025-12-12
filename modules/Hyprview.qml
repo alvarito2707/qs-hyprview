@@ -28,18 +28,28 @@ PanelWindow {
     color: "transparent"
     visible: isActive
 
-    // LayerShell Config
+    // LayerShell Configs
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.exclusiveZone: -1 // Occupa tutto lo schermo sopra le app
+    WlrLayershell.exclusiveZone: -1
     WlrLayershell.keyboardFocus: isActive ? 1 : 0
     WlrLayershell.namespace: "quickshell:expose"
 
     // --- IPC & EVENTS ---
-
     IpcHandler {
         target: "expose"
         function toggle(layout: string) {
             root.layoutAlgorithm = layout
+            root.toggleExpose()
+        }
+
+        function open(layout: string) {
+            root.layoutAlgorithm = layout
+            if (root.isActive) return
+            root.toggleExpose()
+        }
+
+        function close() {
+            if (!root.isActive) return
             root.toggleExpose()
         }
     }
@@ -124,13 +134,11 @@ PanelWindow {
     }
 
     // --- USER INTERFACE ---
-
     FocusScope {
         id: mainScope
         anchors.fill: parent
         focus: true
 
-        // Keyboard navigation
         Keys.onPressed: (event) => {
             if (!root.isActive) return
 

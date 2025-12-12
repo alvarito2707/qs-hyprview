@@ -23,6 +23,8 @@ Item {
 
     property real targetX: -1000
     property real targetY: -1000
+    property real targetZ: 0
+    property real targetRotation: 0
 
     property bool moveCursorToActiveWindow: false
 
@@ -31,9 +33,7 @@ Item {
 
     x: 0
     y: 0
-    z: hovered? 1000: modelData.zIndex || 0
-
-    property real targetRotation: modelData.rotation || 0
+    z: targetZ
     rotation: 0
 
     visible: !!wHandle

@@ -57,13 +57,24 @@ The project exposes an IPC handler named `expose`. You can bind a key in Hyprlan
 
 **In `hyprland.conf`:**
 ```ini
-# Available: "smartgrid", "justified", "masonry", "bands", "hero", "spiral",
-#            "satellite", "staggered", "columnar", "vortex", random"
+# "smartgrid", "justified", "masonry", "bands", "hero", "spiral"
+# "satellite", "staggered", "columnar", "vortex", "random"
 $layout = 'masonry'
+
+# Toggle overview visibility
 bind = $mainMod, TAB, exec, quickshell ipc -p /path/to/cloned/repo call expose toggle $layout
+
+# Open overview
+bind = $mainMod, TAB, exec, quickshell ipc -p /path/to/cloned/repo call expose open $layout
+
+# Close overview
+bind = $mainMod, TAB, exec, quickshell ipc -p /path/to/cloned/repo call expose close
+
 
 # Or, using XDG_CONFIG_HOME:
 #bind = $mainMod, TAB, exec, quickshell ipc -c qs-hyprview call expose toggle $layout
+#bind = $mainMod, TAB, exec, quickshell ipc -c qs-hyprview call expose open $layout
+#bind = $mainMod, TAB, exec, quickshell ipc -c qs-hyprview call expose close
 ```
 ### Visual optimizations
 

